@@ -1,9 +1,21 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-export default function Webcam() {
+type WebcamTypes = {
+  isFlipped: SetStateAction<boolean>;
+  setIsFlipped: Dispatch<SetStateAction<boolean>>;
+};
+
+export default function Webcam({ isFlipped, setIsFlipped }: WebcamTypes) {
   const [hasPermission, setHasPermission] = useState(false);
   const [isError, setIsError] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -37,6 +49,13 @@ export default function Webcam() {
     };
   }, [streamRef.current]);
 
+  // Ensure the video is properly loaded before showing
+  const handleLoadedMetadata = async () => {
+    if (videoRef.current) {
+      await videoRef.current.play();
+    }
+  };
+
   if (isError) {
     return <p>Could not access the webcam. Please check your permissions.</p>;
   }
@@ -46,9 +65,19 @@ export default function Webcam() {
   }
 
   return (
-    <div>
-      <h2>Webcam Feed</h2>
-      <video ref={videoRef} autoPlay muted width="100%" />
+    <div className="h-full w-full object-contain p-2">
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        onLoadedMetadata={handleLoadedMetadata}
+        width="100%"
+        height="100%"
+        style={{
+          border: "2px solid black",
+          transform: isFlipped ? "scaleX(-1)" : "scaleX(1)", // Flip horizontally if isFlipped is true
+        }}
+      />
     </div>
   );
 }

@@ -6,6 +6,9 @@ import { auth } from "@/server/auth";
 
 import { LatestPost } from "./_components/Post";
 import Webcam from "./_components/Webcam";
+import CanvasLayout from "./_components/CanvasLayout";
+import SidePanel from "./_components/SidePanel";
+import Dashboard from "./_components/Dashboard";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
@@ -17,8 +20,15 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#30335c] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+      <main className="flex min-h-screen">
+        <div className="container relative flex flex-col">
+          <div className="relative h-screen w-full flex flex-row">
+            <Dashboard />
+          </div>
+        </div>
+
+        {/* <SidePanel /> */}
+        {/* <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
             Initial Set-Up
           </h1>
@@ -42,7 +52,7 @@ export default async function Home() {
 
           {session?.user && <LatestPost />}
           {session?.user && <Webcam />}
-        </div>
+        </div> */}
       </main>
     </HydrateClient>
   );
