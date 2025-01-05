@@ -1,18 +1,18 @@
 import Link from "next/link";
+import { api, HydrateClient } from "@/trpc/server";
+import { auth } from "@/server/auth";
 
 // import { LatestPost } from "@/app/_components/post";
 
 import { LatestPost } from "./_components/Post";
-
-import { auth } from "@/server/auth";
-import { api, HydrateClient } from "@/trpc/server";
+import Webcam from "./_components/Webcam";
 
 export default async function Home() {
   const hello = await api.post.hello({ text: "from tRPC" });
   const session = await auth();
 
   if (session?.user) {
-    api.post.getLatest.prefetch();
+    void api.post.getLatest.prefetch();
   }
 
   return (
@@ -41,6 +41,7 @@ export default async function Home() {
           </div>
 
           {session?.user && <LatestPost />}
+          {session?.user && <Webcam />}
         </div>
       </main>
     </HydrateClient>
