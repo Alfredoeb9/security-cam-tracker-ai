@@ -1,14 +1,14 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f4dbe8cb-1458-481a-8587-4c98c1cd405f",
+  "id": "7ac6c3f9-7e8f-49c9-9cbe-ebaff549961f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "security_account": {
       "name": "security_account",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
@@ -28,8 +28,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "providerAccountId": {
-          "name": "providerAccountId",
+        "provider_account_id": {
+          "name": "provider_account_id",
           "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
@@ -86,122 +86,39 @@
         }
       },
       "indexes": {
-        "accounts_userId_idx": {
-          "name": "accounts_userId_idx",
+        "account_user_id_idx": {
+          "name": "account_user_id_idx",
           "columns": [
-            "userId"
+            "user_id"
           ],
           "isUnique": false
         }
       },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "security_account_provider_providerAccountId_pk": {
-          "columns": [
-            "provider",
-            "providerAccountId"
-          ],
-          "name": "security_account_provider_providerAccountId_pk"
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "security_authenticator": {
-      "name": "security_authenticator",
-      "columns": {
-        "credentialID": {
-          "name": "credentialID",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "providerAccountId": {
-          "name": "providerAccountId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "credentialPublicKey": {
-          "name": "credentialPublicKey",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "counter": {
-          "name": "counter",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "credentialDeviceType": {
-          "name": "credentialDeviceType",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "credentialBackedUp": {
-          "name": "credentialBackedUp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "transports": {
-          "name": "transports",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "security_authenticator_credentialID_unique": {
-          "name": "security_authenticator_credentialID_unique",
-          "columns": [
-            "credentialID"
-          ],
-          "isUnique": true
-        }
-      },
       "foreignKeys": {
-        "security_authenticator_userId_security_user_id_fk": {
-          "name": "security_authenticator_userId_security_user_id_fk",
-          "tableFrom": "security_authenticator",
+        "security_account_user_id_security_user_id_fk": {
+          "name": "security_account_user_id_security_user_id_fk",
+          "tableFrom": "security_account",
           "tableTo": "security_user",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "security_authenticator_userId_credentialID_pk": {
+        "security_account_provider_provider_account_id_pk": {
           "columns": [
-            "userId",
-            "credentialID"
+            "provider",
+            "provider_account_id"
           ],
-          "name": "security_authenticator_userId_credentialID_pk"
+          "name": "security_account_provider_provider_account_id_pk"
         }
       },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     },
     "security_post": {
       "name": "security_post",
@@ -220,15 +137,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "message": {
-          "name": "message",
-          "type": "text(256)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdById": {
-          "name": "createdById",
+        "created_by": {
+          "name": "created_by",
           "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
@@ -240,7 +150,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "(unixepoch())"
         },
         "updatedAt": {
           "name": "updatedAt",
@@ -251,10 +161,10 @@
         }
       },
       "indexes": {
-        "createdById_idx": {
-          "name": "createdById_idx",
+        "created_by_idx": {
+          "name": "created_by_idx",
           "columns": [
-            "createdById"
+            "created_by"
           ],
           "isUnique": false
         },
@@ -266,24 +176,37 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "security_post_created_by_security_user_id_fk": {
+          "name": "security_post_created_by_security_user_id_fk",
+          "tableFrom": "security_post",
+          "tableTo": "security_user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     },
     "security_session": {
       "name": "security_session",
       "columns": {
-        "sessionToken": {
-          "name": "sessionToken",
-          "type": "text",
+        "session_token": {
+          "name": "session_token",
+          "type": "text(255)",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
         "userId": {
           "name": "userId",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -296,7 +219,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "session_userId_idx": {
+          "name": "session_userId_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "security_session_userId_security_user_id_fk": {
           "name": "security_session_userId_security_user_id_fk",
@@ -308,80 +239,71 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     },
     "security_user": {
       "name": "security_user",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
         "name": {
           "name": "name",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "email": {
           "name": "email",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "emailVerified": {
-          "name": "emailVerified",
+        "email_verified": {
+          "name": "email_verified",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "(unixepoch())"
         },
         "image": {
           "name": "image",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         }
       },
-      "indexes": {
-        "security_user_email_unique": {
-          "name": "security_user_email_unique",
-          "columns": [
-            "email"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     },
-    "security_verificationToken": {
-      "name": "security_verificationToken",
+    "security_verification_token": {
+      "name": "security_verification_token",
       "columns": {
         "identifier": {
           "name": "identifier",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "token": {
           "name": "token",
-          "type": "text",
+          "type": "text(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -397,19 +319,17 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "security_verificationToken_identifier_token_pk": {
+        "security_verification_token_identifier_token_pk": {
           "columns": [
             "identifier",
             "token"
           ],
-          "name": "security_verificationToken_identifier_token_pk"
+          "name": "security_verification_token_identifier_token_pk"
         }
       },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
+      "uniqueConstraints": {}
     }
   },
-  "views": {},
   "enums": {},
   "_meta": {
     "schemas": {},

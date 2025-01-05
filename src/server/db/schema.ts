@@ -3,13 +3,11 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   int,
-  //   integer,
   primaryKey,
   sqliteTableCreator,
   text,
 } from "drizzle-orm/sqlite-core";
 import { AdapterAccount } from "next-auth/adapters";
-// import { type AdapterAccount } from "next-auth/adapters";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -24,41 +22,50 @@ export const posts = createTable(
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     name: text("name", { length: 256 }),
-    message: text("message", { length: 256 }),
-    createdById: text("createdById", { length: 255 }).notNull(),
+    createdById: text("created_by", { length: 255 })
+      .notNull()
+      .references(() => users.id),
     createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`CURRENT_TIMESTAMP`)
+      .default(sql`(unixepoch())`)
       .notNull(),
-    updatedAt: int("updatedAt", { mode: "timestamp" }),
+    updatedAt: int("updatedAt", { mode: "timestamp" }).$onUpdate(
+      () => new Date()
+    ),
   },
-  (example) => [
-    index("createdById_idx").on(example.createdById),
-    index("name_idx").on(example.name),
-  ]
+  (example) => ({
+    createdByIdIdx: index("created_by_idx").on(example.createdById),
+    nameIndex: index("name_idx").on(example.name),
+  })
 );
 
-export type PostsTypes = typeof posts.$inferSelect;
-export type InsertPosts = typeof posts.$inferInsert;
-
 export const users = createTable("user", {
-  id: text("id")
+  id: text("id", { length: 255 })
+    .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name"),
-  email: text("email").unique(),
-  emailVerified: int("emailVerified", { mode: "timestamp_ms" }),
-  image: text("image"),
+  name: text("name", { length: 255 }),
+  email: text("email", { length: 255 }).notNull(),
+  emailVerified: int("email_verified", {
+    mode: "timestamp",
+  }).default(sql`(unixepoch())`),
+  image: text("image", { length: 255 }),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+}));
 
 export const accounts = createTable(
   "account",
   {
-    userId: text("userId", { length: 255 }).notNull(),
+    userId: text("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
     type: text("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
     provider: text("provider", { length: 255 }).notNull(),
-    providerAccountId: text("providerAccountId", { length: 255 }).notNull(),
+    providerAccountId: text("provider_account_id", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
     expires_at: int("expires_at"),
@@ -67,67 +74,44 @@ export const accounts = createTable(
     id_token: text("id_token"),
     session_state: text("session_state", { length: 255 }),
   },
-  (account) => [
-    primaryKey({
+  (account) => ({
+    compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-    index("accounts_userId_idx").on(account.userId),
-  ]
+    userIdIdx: index("account_user_id_idx").on(account.userId),
+  })
 );
 
-// // A account can only have one user id
 export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, {
-    fields: [accounts.userId],
-    references: [users.id],
-  }),
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
-export const sessions = createTable("session", {
-  sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: int("expires", { mode: "timestamp_ms" }).notNull(),
-});
+export const sessions = createTable(
+  "session",
+  {
+    sessionToken: text("session_token", { length: 255 }).notNull().primaryKey(),
+    userId: text("userId", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+    expires: int("expires", { mode: "timestamp" }).notNull(),
+  },
+  (session) => ({
+    userIdIdx: index("session_userId_idx").on(session.userId),
+  })
+);
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
 export const verificationTokens = createTable(
-  "verificationToken",
+  "verification_token",
   {
-    identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: int("expires", { mode: "timestamp_ms" }).notNull(),
+    identifier: text("identifier", { length: 255 }).notNull(),
+    token: text("token", { length: 255 }).notNull(),
+    expires: int("expires", { mode: "timestamp" }).notNull(),
   },
-  (verificationToken) => [
-    primaryKey({
-      columns: [verificationToken.identifier, verificationToken.token],
-    }),
-  ]
-);
-
-export const authenticators = createTable(
-  "authenticator",
-  {
-    credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: text("providerAccountId").notNull(),
-    credentialPublicKey: text("credentialPublicKey").notNull(),
-    counter: int("counter").notNull(),
-    credentialDeviceType: text("credentialDeviceType").notNull(),
-    credentialBackedUp: int("credentialBackedUp", {
-      mode: "boolean",
-    }).notNull(),
-    transports: text("transports"),
-  },
-  (authenticator) => [
-    primaryKey({
-      columns: [authenticator.userId, authenticator.credentialID],
-    }),
-  ]
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
 );
