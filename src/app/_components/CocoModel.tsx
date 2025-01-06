@@ -60,7 +60,7 @@ export default function CocoModel({
     };
     // every time a new videRef or model get rendered run the
     // the useEffect again
-  }, [videoRef, model]);
+  }, [videoRef, model, runPrediction]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function runPrediction() {
