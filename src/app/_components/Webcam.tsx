@@ -1,23 +1,27 @@
 "use client";
 import {
   type Dispatch,
+  type MutableRefObject,
   type SetStateAction,
   useEffect,
-  useRef,
   useState,
 } from "react";
 
 type WebcamTypes = {
   isFlipped: SetStateAction<boolean>;
   setIsFlipped: Dispatch<SetStateAction<boolean>>;
+  streamRef: MutableRefObject<MediaStream | null>;
+  videoRef: MutableRefObject<HTMLVideoElement | null>;
 };
 
-export default function Webcam({ isFlipped, setIsFlipped }: WebcamTypes) {
+export default function Webcam({
+  isFlipped,
+  setIsFlipped,
+  streamRef,
+  videoRef,
+}: WebcamTypes) {
   const [hasPermission, setHasPermission] = useState(false);
   const [isError, setIsError] = useState(false);
-
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const getMediaStream = async () => {

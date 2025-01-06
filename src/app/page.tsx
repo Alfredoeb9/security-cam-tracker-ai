@@ -25,7 +25,6 @@ export default async function Home() {
         <div className="relative flex flex-col w-full">
           <div className="relative h-screen w-full flex flex-row">
             <Dashboard />
-            <CocoModel />
           </div>
         </div>
 

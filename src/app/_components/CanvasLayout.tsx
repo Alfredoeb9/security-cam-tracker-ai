@@ -1,9 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { type MutableRefObject } from "react";
 
-export default function CanvasLayout() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+type CanvasTypes = {
+  canvasRef: MutableRefObject<HTMLCanvasElement | null>;
+};
+
+export default function CanvasLayout({ canvasRef }: CanvasTypes) {
   return (
     <canvas
       ref={canvasRef}
