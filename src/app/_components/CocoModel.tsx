@@ -37,7 +37,6 @@ export default function CocoModel({
     const loadedModel: ObjectDetection = await cocossd.load({
       base: "mobilenet_v2",
     });
-    console.log("loaded", loadedModel);
     setModel(loadedModel);
   }
 
@@ -48,8 +47,6 @@ export default function CocoModel({
   }, [model]);
 
   useEffect(() => {
-    console.log("model", model);
-    console.log("videoRef", videoRef.current);
     if (model && videoRef.current) {
       intervalRef.current = setInterval(() => {
         void runPrediction();

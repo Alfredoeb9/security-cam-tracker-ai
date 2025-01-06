@@ -1,4 +1,4 @@
-import { MutableRefObject } from "react";
+import { type MutableRefObject } from "react";
 
 export function resizeCanvas(
   canvasRef: MutableRefObject<HTMLCanvasElement | null>,
@@ -8,7 +8,7 @@ export function resizeCanvas(
   const video = videoRef.current;
 
   if (canvas && video) {
-    canvas.width = video.videoWidth ?? 640;
-    canvas.height = video.videoHeight ?? 480;
+    canvas.width = video?.videoWidth ?? 640;
+    canvas.height = video?.videoHeight ?? 480;
   }
 }
