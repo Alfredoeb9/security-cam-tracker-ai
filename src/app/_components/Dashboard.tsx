@@ -5,7 +5,6 @@ import CanvasLayout from "./CanvasLayout";
 import SidePanel from "./SidePanel";
 
 export default function Dashboard() {
-  //   const session = await auth();
   const [isFlipped, setIsFlipped] = useState(false); // State to track whether the video is flipped
 
   return (
