@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
-
 import {
   type Dispatch,
-  MutableRefObject,
+  type MutableRefObject,
   type SetStateAction,
   useEffect,
   useState,
@@ -36,14 +32,13 @@ export default function SidePanel({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [autoRecordEnabled, setAutoRecordEnabled] = useState<boolean>(false);
   const [downloadLink, setDownloadLink] = useState<string>("");
-  let stopTimeout: NodeJS.Timeout;
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
 
-  // Start screen capture
+  // Function to start screen capture
   // const startScreenCapture = async () => {
   //   try {
   //     const stream = await navigator.mediaDevices.getDisplayMedia({
   //       video: true,
-  //       audio: true, // Optional: if you want audio too
   //     });
 
   //     if (videoRef.current) {
@@ -52,17 +47,17 @@ export default function SidePanel({
   //       await videoRef.current.play();
 
   //       // Start recording the screen
-  //       startRecording(stream);
+  //       startRecording();
   //     }
   //   } catch (error) {
   //     console.error("Error accessing display media:", error);
   //   }
   // };
 
-  // Function to start recording the webcam
-  useEffect(() => {
-    if (videoRef.current) {
-      const stream = videoRef.current.captureStream(); // Capture the webcam stream and cast to MediaStream
+  // Function to start recording the webcam or screen
+  const startRecording = () => {
+    if (videoRef.current && mediaRecorderRef.current?.state !== "recording") {
+      const stream = videoRef.current.captureStream(); // Capture the video element stream
       if (stream) {
         // Initialize the MediaRecorder with the stream
         mediaRecorderRef.current = new MediaRecorder(stream);
@@ -87,28 +82,31 @@ export default function SidePanel({
             type: "video/webm",
           });
           const videoURL = URL.createObjectURL(recordedBlob);
+          setDownloadLink(videoURL);
 
           // Create a link to download the recorded video
           const a = document.createElement("a");
           a.href = videoURL;
           a.download = `${formatDate(new Date())}.webm`; // Format the filename with the current date
           a.click();
+
+          recordedChunksRef.current = [];
         };
 
         // Start recording
         mediaRecorderRef.current.start();
+
+        setTimeout(() => {
+          if (mediaRecorderRef.current?.state === "recording") {
+            mediaRecorderRef.current.requestData();
+            mediaRecorderRef.current.stop();
+          }
+        }, 30000);
       }
     }
-  }, [mediaRecorderRef, recordedChunksRef, videoRef]);
-
-  // Function to stop recording
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
   };
 
-  // Effect to handle the setup of the webcam video stream
   useEffect(() => {
-    // Get the webcam stream and set it to the video element
     const getUserMedia = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -127,13 +125,22 @@ export default function SidePanel({
 
     // Cleanup the stream on component unmount
     return () => {
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current?.srcObject as MediaStream;
+      const videoElement = videoRef.current;
+      if (videoElement?.srcObject instanceof MediaStream) {
+        const stream = videoElement.srcObject;
         const tracks = stream.getTracks();
-        tracks.forEach((track) => track.stop()); // Stop the tracks when the component unmounts
+        tracks.forEach((track) => track.stop());
       }
     };
   }, [videoRef]);
+
+  // Function to stop recording
+  const stopRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.requestData();
+      mediaRecorderRef.current.stop();
+    }
+  };
 
   // Function to toggle the horizontal flip
   const toggleFlip = () => {
@@ -150,24 +157,10 @@ export default function SidePanel({
     }
 
     if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.requestData();
-      mediaRecorderRef.current.stop();
+      stopRecording();
       alert("Recording saved to downloads");
     } else {
       startRecording();
-    }
-  };
-
-  const startRecording = () => {
-    if (videoRef.current && mediaRecorderRef.current?.state !== "recording") {
-      mediaRecorderRef.current?.start();
-
-      stopTimeout = setTimeout(() => {
-        if (mediaRecorderRef.current?.state === "recording") {
-          mediaRecorderRef.current.requestData();
-          mediaRecorderRef.current.stop();
-        }
-      }, 30000);
     }
   };
 
@@ -194,7 +187,9 @@ export default function SidePanel({
         <div className="flex flex-col gap-2">
           <hr className="my-2" />
           <button onClick={handleScreenshot}>Screenshot</button>
-
+          {/* <button onClick={startScreenCapture} disabled={isRecording}>
+            {isRecording ? "Recording..." : "Start Screen Capture"}
+          </button> */}
           <button
             onClick={handleRecordSession}
             className={isRecording ? "border-red-500" : "border-transparent"}
