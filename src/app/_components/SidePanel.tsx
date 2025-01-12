@@ -127,7 +127,27 @@ export default function SidePanel({
   };
 
   const handleScreenshot = () => {
-    console.log("screenshot taken");
+    if (!videoRef.current) {
+      alert("Camera not found, Please refresh");
+    } else {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      if (context) {
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas content to a data URL
+        const imgDataUrl = canvas.toDataURL("image/png");
+
+        // Create a link to download the image
+        const a = document.createElement("a");
+        a.href = imgDataUrl;
+        a.download = `${formatDate(new Date())}.png`; // Format the filename with the current date
+        a.click();
+      }
+    }
   };
 
   const handleRecordSession = () => {

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 "use client";
 import React, {
+  type Dispatch,
   type MutableRefObject,
+  type SetStateAction,
   useEffect,
   useRef,
   useState,
@@ -17,6 +19,8 @@ type CocoModelTypes = {
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   canvasRef: MutableRefObject<HTMLCanvasElement | null>;
   isFlipped: boolean;
+  autoRecordEnabled: SetStateAction<boolean>;
+  setAutoRecordEnabled: Dispatch<SetStateAction<boolean>>;
 };
 
 export default function CocoModel({

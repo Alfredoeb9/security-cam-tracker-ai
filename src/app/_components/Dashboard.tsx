@@ -16,6 +16,7 @@ export default function Dashboard() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]); // To store the recorded data
+  const [autoRecordEnabled, setAutoRecordEnabled] = useState<boolean>(false);
 
   return (
     <>
@@ -23,6 +24,8 @@ export default function Dashboard() {
         videoRef={videoRef}
         canvasRef={canvasRef}
         isFlipped={isFlipped}
+        autoRecordEnabled={autoRecordEnabled}
+        setAutoRecordEnabled={setAutoRecordEnabled}
       />
 
       <Webcam
