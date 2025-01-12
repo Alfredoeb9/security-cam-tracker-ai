@@ -17,8 +17,6 @@ export default function Dashboard() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]); // To store the recorded data
 
-  console.log("videoRef", videoRef);
-  console.log("canvas", canvasRef);
   return (
     <>
       <CocoModel

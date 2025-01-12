@@ -32,27 +32,6 @@ export default function SidePanel({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [autoRecordEnabled, setAutoRecordEnabled] = useState<boolean>(false);
   const [downloadLink, setDownloadLink] = useState<string>("");
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-
-  // Function to start screen capture
-  // const startScreenCapture = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getDisplayMedia({
-  //       video: true,
-  //     });
-
-  //     if (videoRef.current) {
-  //       // Display the captured screen in a video element
-  //       videoRef.current.srcObject = stream;
-  //       await videoRef.current.play();
-
-  //       // Start recording the screen
-  //       startRecording();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error accessing display media:", error);
-  //   }
-  // };
 
   // Function to start recording the webcam or screen
   const startRecording = () => {
@@ -187,9 +166,6 @@ export default function SidePanel({
         <div className="flex flex-col gap-2">
           <hr className="my-2" />
           <button onClick={handleScreenshot}>Screenshot</button>
-          {/* <button onClick={startScreenCapture} disabled={isRecording}>
-            {isRecording ? "Recording..." : "Start Screen Capture"}
-          </button> */}
           <button
             onClick={handleRecordSession}
             className={isRecording ? "border-red-500" : "border-transparent"}
